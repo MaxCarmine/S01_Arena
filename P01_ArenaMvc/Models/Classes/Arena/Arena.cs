@@ -62,9 +62,12 @@ namespace P01_ArenaMvc.Models.Classes.Arena
             var OrderOfAttack = SortFighters(Fighters);
             var deadPool = Fighters;
             var moreThanOneFighterIsAlive = deadPool.Count > 1;
-            while (GameInProgress) { 
-                while (moreThanOneFighterIsAlive) {
-                    if (GameInProgress) {
+            while (GameInProgress) {
+                if (!GameInProgress) {
+                    continue;
+                }
+                    while (moreThanOneFighterIsAlive) {
+                    if (!GameInProgress) {
                         continue;
                     }
                     if (OneFighterLeft(deadPool)) {

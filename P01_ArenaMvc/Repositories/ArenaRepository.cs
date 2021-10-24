@@ -23,7 +23,7 @@ namespace P01_ArenaMvc.Repositories
             coloseum.StartGame();
         }
 
-        public async Task Stop() {
+        public  void Stop() {
              coloseum.StopGame();
         }
 
