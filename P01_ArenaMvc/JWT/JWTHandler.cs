@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -10,16 +11,23 @@ using System.Threading.Tasks;
 
 namespace P01_ArenaMvc.JWT
 {
-    public class TokenHandler
+    
+    public  interface IJWTHandler
     {
-        public IConfiguration Configuration { get; }
-        public TokenHandler(IConfiguration configuration) {
-            Configuration = configuration;
+        public string GenerateToken(string username);
+        public int? ValidateToken(string token);
+    }
+    public class JWTHandler : IJWTHandler
+    {
+        private readonly MyScreteKey _appSettings;
+
+        public JWTHandler(IOptions<MyScreteKey> appSettings) {
+            _appSettings = appSettings.Value;
         }
         public string GenerateToken(string username) {
             // generate token that is valid for 7 days
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(Configuration["Secret"]);
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new[] { new Claim("username", username) }),
                 Expires = DateTime.UtcNow.AddDays(7),
@@ -34,7 +42,7 @@ namespace P01_ArenaMvc.JWT
                 return null;
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(Configuration["Secret"]);
+            var key = Encoding.ASCII.GetBytes("DA1FCB34143D10F8FFFDEE810D22F5A5C7683EE34BBCF63B9404FA25D1D63D8E");
             try {
                 tokenHandler.ValidateToken(token, new TokenValidationParameters {
                     ValidateIssuerSigningKey = true,
@@ -46,13 +54,13 @@ namespace P01_ArenaMvc.JWT
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                var username = int.Parse(jwtToken.Claims.First(x => x.Type == "username").Value);
 
                 // return user id from JWT token if validation successful
-                return userId;
-            } catch {
+                return username;
+            } catch(InvalidOperationException) {
                 // return null if validation fails
-                return null;
+                return 2;
             }
         }
     }

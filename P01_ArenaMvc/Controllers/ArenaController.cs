@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using P01_ArenaMvc.Entity;
 using P01_ArenaMvc.Models;
@@ -26,6 +27,7 @@ namespace P01_ArenaMvc.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<string> StartArena() {
             var listOfFighters = await _repoFighters.GetList();
             var convertedFighters = ConvertEntityToModal(listOfFighters);
@@ -65,6 +67,7 @@ namespace P01_ArenaMvc.Controllers
 
 
         [HttpGet]
+        [Authorize]
         public  async Task<List<string>> RetriveLogs(int number) {
              return await _repoArena.GetLogs(number);
         }
@@ -72,7 +75,7 @@ namespace P01_ArenaMvc.Controllers
 
         [HttpGet]
         public async Task<string> StopGame() {
-            await _repoArena.Stop();
+             _repoArena.Stop();
             return "The match has stoped";
         }
     }
