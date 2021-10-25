@@ -25,20 +25,18 @@ namespace P01_ArenaMvc.Middleware
         }
 
         public async Task Invoke(HttpContext context) {
+
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             var userId = ValidateToken(token);
             if (userId != null) {
-                // attach user to context on successful jwt validation
                 context.Items["username"] = "username";
             }
-
             await _next(context);
         }
 
         public string? ValidateToken(string token) {
             if (token == null)
                 return null;
-
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes("DA1FCB34143D10F8FFFDEE810D22F5A5C7683EE34BBCF63B9404FA25D1D63D8E");
             try {
@@ -53,11 +51,8 @@ namespace P01_ArenaMvc.Middleware
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var username = jwtToken.Claims.First(x => x.Type == "username").Value;
-
-                // return user id from JWT token if validation successful
                 return username;
             } catch (InvalidOperationException) {
-                // return null if validation fails
                 return null;
             }
 

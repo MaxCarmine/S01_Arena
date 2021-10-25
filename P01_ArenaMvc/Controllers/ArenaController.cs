@@ -14,6 +14,7 @@ namespace P01_ArenaMvc.Controllers
 {
     [ApiController]
     [Route("[controller]/[action]")]
+    [Authorize]
     public class ArenaController : ControllerBase
     {
         private readonly ILogger<ArenaController> _logger;
@@ -27,7 +28,6 @@ namespace P01_ArenaMvc.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<string> StartArena() {
             var listOfFighters = await _repoFighters.GetList();
             var convertedFighters = ConvertEntityToModal(listOfFighters);
@@ -67,7 +67,6 @@ namespace P01_ArenaMvc.Controllers
 
 
         [HttpGet]
-        [Authorize]
         public  async Task<List<string>> RetriveLogs(int number) {
              return await _repoArena.GetLogs(number);
         }
