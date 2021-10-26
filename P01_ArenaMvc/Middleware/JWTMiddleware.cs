@@ -20,7 +20,7 @@ namespace P01_ArenaMvc.Middleware
         public async Task InvokeAsync(HttpContext context, RequestDelegate next) {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             if (!string.IsNullOrEmpty(token)) {
-                Console.WriteLine("The toekn is not null ");
+                Console.WriteLine("The token is not null ");
                 attachUserToContext(context, token);
                 await next(context);
             }
