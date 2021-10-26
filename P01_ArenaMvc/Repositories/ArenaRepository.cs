@@ -27,17 +27,17 @@ namespace P01_ArenaMvc.Repositories
              coloseum.StopGame();
         }
 
-        public async Task CheckStatus() {
+        //public async Task CheckStatus() {
 
-        }
+        //}
 
-        public async Task<List<string>> GetLogs(int numberOfLogs) {
+        public List<string> GetLogs(int numberOfLogs) {
             ErrorMessages.Add("Game hasent begun nothing to show");
             try {
                 if (coloseum != null) {
-                    return await coloseum.GetLogs(numberOfLogs);
+                    return coloseum.GetLogs(numberOfLogs);
                 } 
-            }catch(NullReferenceException ex) {
+            }catch(NullReferenceException) {
                 return ErrorMessages;
                 //Console.WriteLine(ex);
                 //throw new NullReferenceException();

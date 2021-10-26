@@ -7,9 +7,9 @@ namespace P01_ArenaMvc.Models
 {
     abstract public class Fighter : IFighter
     {
-        public event Action<string> Died;
-        public event Action<string> Damaged;
-        public event Action<string> Attacked;
+        public event Action<Fighter> Died;
+        public event Action<Fighter,int> Damaged;
+        public event Action<Fighter,int> Attacked;
 
         public int ID { get; set; }  
         public string EpicName { get; set; }
@@ -20,34 +20,31 @@ namespace P01_ArenaMvc.Models
 
         public virtual void Fight(Fighter adversire) {
             var attack = CalculateDamage();
-            OnAttack(adversire.EpicName,attack);
-            adversire.TakeDamage(attack);
+            RaiseAttack(adversire,attack);
+            adversire.TakeDamage(adversire,attack);
         }
 
         internal abstract int CalculateDamage();
 
-        internal void TakeDamage(int damage) {
+        internal void TakeDamage(Fighter fighter, int damage) {
             PV -= damage;
-            OnHit(damage);
+            RaiseHit(fighter,damage);
             if (PV < 1) {
-                OnDeath();
+                RaiseDeath(fighter);
             }
             
         }
 
-        internal void OnHit(int damage) {
-            var msg = $"{EpicName} has been DAMAGED with {damage} !!!";
-            Damaged?.Invoke(msg);
+        internal void RaiseHit(Fighter figher, int damage) {
+            Damaged?.Invoke(figher,damage);
         }
 
-        internal void OnAttack(string advName, int damage) {
-            var msg = $"{EpicName} has attacked {advName} ===> dealing {damage} damage";
-            Attacked?.Invoke(msg);
+        internal void RaiseAttack(Fighter figher, int damage) {
+            Attacked?.Invoke(figher, damage);
         }
 
-        internal void OnDeath() {
-            var msg = $"{EpicName} has DIED!!!";
-            Died?.Invoke(msg);
+        internal void RaiseDeath(Fighter fighter) {
+            Died?.Invoke(fighter);
         }
     }
 }

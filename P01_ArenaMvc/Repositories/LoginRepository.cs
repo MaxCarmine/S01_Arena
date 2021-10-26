@@ -32,7 +32,6 @@ namespace P01_ArenaMvc.Repositories
         }
 
         public string GenerateToken(string username) {
-            // generate token that is valid for 7 days
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes("DA1FCB34143D10F8FFFDEE810D22F5A5C7683EE34BBCF63B9404FA25D1D63D8E");
             var tokenDescriptor = new SecurityTokenDescriptor {

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -28,34 +29,32 @@ namespace P01_ArenaMvc
         public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services) {
-
             services.AddDbContext<AppDbCtx>(options => {
                 object p = options.UseNpgsql(Configuration.GetConnectionString("Default Connection"));
             });
-            services.AddScoped<FighterRepository>();
-            services.AddScoped<LoginRepository>();
-            services.AddSingleton<ArenaRepository>();
-            services.AddAuthentication(IISDefaults.AuthenticationScheme)
-                .AddCookie(options => {
-                    options.LoginPath = "/Account/Unauthorized/";
-                    options.AccessDeniedPath = "/Account/Forbidden/";
-                })
-                .AddJwtBearer(options => {
-                    options.Audience = "http://localhost:5001/";
-                    options.Authority = "http://localhost:5000/";
-                });
+            services
+                .AddScoped<FighterRepository>()
+                .AddScoped<LoginRepository>()
+                .AddSingleton<ArenaRepository>()
+                .AddSingleton<JWTMiddleware>();
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = Configuration["Auth0:Authority"];
+                options.Audience = Configuration["Auth0:Audience"];
+                options.RequireHttpsMetadata = false;
+            });
             services.AddControllers();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
             app.UseRouting();
-            try {
-                app.UseAuthorization();
-                app.UseMiddleware<JWTMiddleware>();
-
-            } catch (InvalidOperationException) {
-                Console.WriteLine("Proooooblem");
-            }
+            app.UseAuthorization();
+            app.UseMiddleware<JWTMiddleware>();
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
             });

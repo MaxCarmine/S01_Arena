@@ -11,8 +11,8 @@ namespace P01_ArenaMvc.Models.Classes.Fighters.Fighters.Type
 
         public override void Fight(Fighter adversire) {
             var attack = (CalculateDamage() * adversire.PV) / 100;
-            OnAttack(adversire.EpicName, attack);
-            adversire.TakeDamage(attack);
+            RaiseAttack(adversire, attack);
+            adversire.TakeDamage(adversire, attack);
         }
 
 

@@ -10,45 +10,37 @@ namespace P01_ArenaMvc.Models.Classes.Arena
     {
         //Get Fighters
         public List<Fighter> Fighters { get; set; } 
-        public List<string> Logs { get; set; }
-        private event Action<string> HasWon;
-        private int _Turn { get; set; }
-        private int _Round { get; set; }
+        public event Action<Fighter> HasWon;
+        public int _Turn { get; set; }
+        public int _Round { get; set; }
         public bool GameInProgress { get; set; }
+        const string msg = "Arena has begun";
+        public OutputManager outputManager;
 
         public Arena(List<Fighter> fighters) {
-            Logs = new List<string>();
+            outputManager = new OutputManager();
             Fighters = fighters;
             AddEvent();
 
         }
 
-        public async Task<List<string>> GetLogs(int numberOfLogs) {
-            const string msg2 = "Arena has begun";
-            Logs.Add(msg2);
+        public List<string> GetLogs(int numberOfLogs) {
+            outputManager.Logs.Add(msg);
             if (numberOfLogs >= 1) {
-                var selectedLogs = new string[numberOfLogs];
-                var lenthg = Logs.Count();
+                var lenthg = outputManager.Logs.Count();
                 var index = lenthg - numberOfLogs;
-                Logs.CopyTo(index, selectedLogs, 0, numberOfLogs);
-                return  selectedLogs.ToList();
+                return outputManager.Logs.Skip(index).ToList();
             }
-            return Logs;
-
+            return outputManager.Logs;
         }
 
         private void AddEvent() {
             foreach(var f in Fighters) {
-                f.Attacked += LogEvent;
-                f.Damaged += LogEvent;
-                f.Died += LogEvent;
+                f.Attacked += outputManager.Attack;
+                f.Damaged += outputManager.Hit;
+                f.Died += outputManager.Died;
             }
-            HasWon += LogEvent;
-        }
-
-        private void LogEvent(string log) {
-            Logs.Add(log);
-            Console.WriteLine(log);
+            HasWon += outputManager.Won;
         }
 
         public  void StopGame() {
@@ -62,21 +54,13 @@ namespace P01_ArenaMvc.Models.Classes.Arena
             var OrderOfAttack = SortFighters(Fighters);
             var deadPool = Fighters;
             var moreThanOneFighterIsAlive = deadPool.Count > 1;
-            while (GameInProgress) {
-                if (!GameInProgress) {
+                while (moreThanOneFighterIsAlive && GameInProgress) {
+                if (OneFighterLeft(deadPool)) {
                     continue;
                 }
-                    while (moreThanOneFighterIsAlive) {
-                    if (!GameInProgress) {
-                        continue;
-                    }
-                    if (OneFighterLeft(deadPool)) {
-                        continue;
-                    }
-                    StartOfRound(OrderOfAttack, deadPool);
-                    await Task.Delay(1000);
-                    EndOfRound(OrderOfAttack, deadPool);
-                }
+                StartOfRound(OrderOfAttack, deadPool);
+                await Task.Delay(1000);
+                EndOfRound(OrderOfAttack, deadPool);
             }
         }
 
@@ -85,10 +69,8 @@ namespace P01_ArenaMvc.Models.Classes.Arena
             FighterHasWon(winner);
         }
         private void FighterHasWon(Fighter winner) {
-            var msg = $"{winner.EpicName} has won the games";
-            HasWon?.Invoke(msg);
+            HasWon?.Invoke(winner);
         }
-
 
         private async void StartOfRound(List<Fighter> attackOrder, List<Fighter> deadpool) {
             foreach (var f in attackOrder) {
@@ -113,10 +95,6 @@ namespace P01_ArenaMvc.Models.Classes.Arena
         private void AttackersTurn(Fighter attacker, Fighter advesire) {
             attacker.Fight(advesire);
             _Turn++;
-            //if (advesire.PV <= 0) {
-            //    //Message.Notify($"{attacker.EpicName} has killed {advesire.EpicName}");
-                
-            //}
         }
 
         static private Fighter PickAdversire(Fighter currFighter, List<Fighter> deadpool) {
@@ -142,15 +120,7 @@ namespace P01_ArenaMvc.Models.Classes.Arena
             }
         }
 
-
         private void EndOfRound(List<Fighter> orderOfFighters, List<Fighter> deadpool) {
-            //Check what fighters are left alive
-            //Remove dead fighters from list Fighters.
-            foreach (var f in deadpool) {
-                if (f.PV <= 0) {
-                    //Message.Notify($"{f.EpicName} is dead");
-                }
-            }
             foreach (var f in orderOfFighters) {
                 if (f.PV <= 0) {
                     deadpool.Remove(f);
@@ -160,18 +130,10 @@ namespace P01_ArenaMvc.Models.Classes.Arena
                 _Turn = 0;
                 _Round++;
             }
-
         }
-
 
         private List<Fighter> SortFighters(List<Fighter> fighters) {
-            var SortedList = new List<Fighter>();
-            SortedList = fighters.OrderByDescending(sp => sp.Speed).ToList();
-            return SortedList;
-
+            return fighters.OrderByDescending(sp => sp.Speed).ToList();
         }
-
-
     }
-
 }

@@ -27,15 +27,15 @@ namespace P01_ArenaMvc.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<string> StartArena() {
             var listOfFighters = await _repoFighters.GetList();
-            var convertedFighters = ConvertEntityToModal(listOfFighters);
-             _repoArena.Start(convertedFighters);
+            var convertedFighters = ConvertEntityToModel(listOfFighters);
+            _repoArena.Start(convertedFighters);
             return "Arena Has Begun";
         }
 
-        private  List<Fighter> ConvertEntityToModal(List<FighterEntity> listOfFighters) {
+        private List<Fighter> ConvertEntityToModel(List<FighterEntity> listOfFighters) {
             var convertedFighters = new List<Fighter>();
             foreach(var fe in listOfFighters) {
                 convertedFighters.Add(CloneFighters(fe));
@@ -43,7 +43,7 @@ namespace P01_ArenaMvc.Controllers
             return convertedFighters;
         }
 
-        private  Fighter CloneFighters(FighterEntity dbfighter) {
+        private Fighter CloneFighters(FighterEntity dbfighter) {
             var FightersDictionary = FD;
             var fighterClass = dbfighter.Class;
             var fighterType = FightersDictionary[fighterClass];
@@ -58,22 +58,18 @@ namespace P01_ArenaMvc.Controllers
         }
 
         private Dictionary<int, Type> FD = new Dictionary<int, Type> {
-            {1, typeof(Warrior) },
-            {2, typeof(Wizard) },
-            {3, typeof(Ork) },
-            //{4, typeof(Assasin) },
-            //{5, typeof(Healer) },
+            { 1, typeof(Warrior) },
+            { 2, typeof(Wizard) },
+            { 3, typeof(Ork) }
         };
 
-
         [HttpGet]
-        public  async Task<List<string>> RetriveLogs(int number) {
-             return await _repoArena.GetLogs(number);
+        public List<string> RetriveLogs(int number) {
+             return  _repoArena.GetLogs(number);
         }
 
-
-        [HttpGet]
-        public async Task<string> StopGame() {
+        [HttpPost]
+        public string StopGame() {
              _repoArena.Stop();
             return "The match has stoped";
         }

@@ -2,10 +2,7 @@
 using Microsoft.Extensions.Logging;
 using P01_ArenaMvc.Models.Attributes;
 using P01_ArenaMvc.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace P01_ArenaMvc.Controllers
 {
@@ -23,10 +20,9 @@ namespace P01_ArenaMvc.Controllers
 
         [HttpPost]
         [AllowAnonymouse]
-        public async Task<string> Login(string username) {
+        public string Login(string username) {
             if (_repoLogin.UserExists(username)) {
-                var t =  _repoLogin.GetToken(username);
-                return t;
+                return _repoLogin.GetToken(username); ;
             } else {
                 //Send string "User does not exist"
                 return $"invalid user {username} does not exist";
